@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Telegram-боти та сайти для бізнесу</title>
+<meta name="description" content="Telegram-боти та сайти, які приймають заявки 24/7 і не дають їм загубитися.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== ЦВЕТА И ШРИФТЫ ===== */
+  :root {
+    --ink: #13213a;        /* основной текст */
+    --ink-soft: #4b5873;   /* второстепенный текст */
+    --paper: #f2f4f1;      /* фон страницы */
+    --white: #ffffff;
+    --line: #d9ded8;       /* разделители */
+    --tg: #2481cc;         /* синий Telegram: действия */
+    --tg-dark: #1b6aa9;
+    --done: #1f9d63;       /* зелёный: «Зв'язались» */
+    --wait: #d9930f;       /* янтарный: напоминание */
+    --chat-bg: #dfe7ee;    /* фон чата */
+    --display: 'Unbounded', sans-serif;
+    --body: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--body); font-size: 17px; line-height: 1.6; color: var(--ink); background: var(--paper); }
+  a { color: inherit; }
+  :focus-visible { outline: 3px solid var(--tg); outline-offset: 3px; border-radius: 4px; }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  h1, h2, h3 { font-family: var(--display); font-weight: 700; line-height: 1.12; letter-spacing: -0.01em; }
+  h2 { font-size: clamp(28px, 4vw, 40px); margin-bottom: 14px; }
+  .lede { color: var(--ink-soft); max-width: 60ch; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 15px 24px; border-radius: 10px;
+    background: var(--tg); color: var(--white);
+    font: 600 17px var(--body); text-decoration: none;
+    border: 0; cursor: pointer;
+  }
+  .btn:hover { background: var(--tg-dark); }
+  .btn svg { flex: none; }
+  .link { font-weight: 600; text-decoration-thickness: 2px; text-underline-offset: 4px; text-decoration-color: var(--tg); }
+
+  /* ===== ШАПКА ===== */
+  .top { padding: 22px 0; }
+  .top .wrap { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+  .brand { font-family: var(--display); font-weight: 700; font-size: 18px; text-decoration: none; }
+  .top nav { display: flex; gap: 26px; }
+  .top nav a { text-decoration: none; color: var(--ink-soft); font-weight: 500; }
+  .top nav a:hover { color: var(--ink); }
+
+  /* ===== ПЕРВЫЙ ЭКРАН ===== */
+  .hero { padding: 48px 0 88px; }
+  .hero .wrap { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 56px; align-items: center; }
+  .hero h1 { font-size: clamp(36px, 5.4vw, 62px); margin-bottom: 22px; }
+  .hero .lede { font-size: 19px; margin-bottom: 30px; }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 22px; align-items: center; }
+
+  /* Демо-чат */
+  .chat {
+    background: var(--chat-bg);
+    border-radius: 18px;
+    padding: 14px 14px 18px;
+    border: 1px solid #cbd6e0;
+  }
+  .chat-head { display: flex; align-items: center; gap: 12px; padding: 4px 6px 14px; border-bottom: 1px solid #c9d4de; margin-bottom: 14px; }
+  .chat-ava { width: 38px; height: 38px; border-radius: 50%; background: var(--tg); color: #fff; display: grid; place-items: center; font: 700 14px var(--display); }
+  .chat-title { font-weight: 600; line-height: 1.2; }
+  .chat-sub { font-size: 13px; color: var(--ink-soft); }
+
+  .msg { background: var(--white); border-radius: 14px 14px 14px 4px; padding: 14px 16px; font-size: 15px; line-height: 1.55; max-width: 100%; }
+  .msg + .msg, .msg + .kbd, .kbd + .msg { margin-top: 8px; }
+  .msg-from { font-size: 13px; font-weight: 600; color: var(--tg); margin-bottom: 4px; }
+  .lead-title { font-weight: 600; }
+  .status { display: inline-block; font-size: 13px; font-weight: 600; padding: 1px 8px; border-radius: 6px; margin-left: 6px; background: #e6eefc; color: var(--tg-dark); }
+  .status.taken { background: #fdf1d8; color: #8a5d05; }
+  .status.done { background: #dcf2e7; color: #15724a; }
+  .lead-urgent { font-size: 13px; font-weight: 600; color: #b4530b; margin-bottom: 4px; }
+  .lead-meta { font-size: 13px; color: var(--ink-soft); margin-bottom: 8px; }
+  .lead-owner { margin-top: 8px; font-weight: 500; }
+  .kbd { display: flex; gap: 6px; }
+  .kbd button {
+    flex: 1; padding: 11px 10px; border-radius: 10px; border: 0;
+    background: rgba(255,255,255,0.75); color: var(--ink);
+    font: 600 15px var(--body); cursor: pointer;
+  }
+  .kbd button:hover { background: var(--white); }
+  .msg.reminder { border-left: 4px solid var(--wait); }
+  .chat-hint { font-size: 13px; color: var(--ink-soft); text-align: center; margin-top: 12px; }
+
+  .arrive { animation: arrive 0.5s ease-out both; }
+  @keyframes arrive { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .arrive { animation: none; } html { scroll-behavior: auto; } }
+
+  /* ===== ОБЩИЕ СЕКЦИИ ===== */
+  .block { padding: 88px 0; border-top: 1px solid var(--line); }
+  .block-head { margin-bottom: 40px; }
+
+  /* Услуги — строки прайса, а не карточки */
+  .price-list { list-style: none; border-top: 2px solid var(--ink); }
+  .price-list li {
+    display: grid; grid-template-columns: 300px 1fr 130px; gap: 28px; align-items: baseline;
+    padding: 24px 0; border-bottom: 1px solid var(--line);
+  }
+  .price-list h3 { font-size: 19px; }
+  .price-list p { color: var(--ink-soft); }
+  .price { font-family: var(--display); font-weight: 500; font-size: 20px; white-space: nowrap; text-align: right; }
+  .price small { font-family: var(--body); font-size: 14px; color: var(--ink-soft); font-weight: 400; }
+
+  /* Кейс */
+  .case { background: var(--white); border-radius: 22px; padding: 48px; }
+  .case-top { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; margin-bottom: 44px; }
+  .case h3 { font-size: 15px; font-family: var(--body); font-weight: 600; color: var(--ink-soft); margin-bottom: 8px; }
+  .case-top p { max-width: 52ch; }
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-bottom: 44px; counter-reset: flow; }
+  .flow div { position: relative; padding: 0 22px 0 0; }
+  .flow div::after {
+    content: ""; position: absolute; top: 15px; right: 8px; left: 46px; height: 2px; background: var(--line);
+  }
+  .flow div:last-child::after { display: none; }
+  .flow b {
+    display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%;
+    background: var(--ink); color: var(--white); font: 700 14px var(--display); margin-bottom: 14px;
+  }
+  .flow span { display: block; font-weight: 600; margin-bottom: 4px; }
+  .flow small { display: block; color: var(--ink-soft); font-size: 15px; line-height: 1.5; padding-right: 8px; }
+  .features { list-style: none; columns: 2; column-gap: 48px; }
+  .features li { break-inside: avoid; padding: 10px 0 10px 30px; position: relative; border-bottom: 1px solid var(--line); }
+  .features li::before { content: ""; position: absolute; left: 0; top: 19px; width: 12px; height: 12px; border-radius: 3px; background: var(--done); }
+
+  /* Как работаем */
+  .steps { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+  .steps li b { display: block; font: 700 44px var(--display); color: var(--tg); line-height: 1; margin-bottom: 14px; }
+  .steps li span { display: block; font-weight: 600; margin-bottom: 6px; }
+  .steps li p { color: var(--ink-soft); font-size: 16px; }
+
+  /* Контакт */
+  .contact { padding: 96px 0; background: var(--ink); color: var(--white); }
+  .contact h2 { font-size: clamp(30px, 4.6vw, 50px); max-width: 18ch; margin-bottom: 18px; }
+  .contact p { color: #b9c3d6; max-width: 54ch; margin-bottom: 32px; }
+  .contact .alt { margin-top: 22px; color: #b9c3d6; font-size: 15px; }
+  .contact .alt a { color: var(--white); }
+
+  footer { padding: 26px 0; font-size: 14px; color: var(--ink-soft); }
+
+  /* ===== АДАПТИВ ===== */
+  @media (max-width: 900px) {
+    .hero .wrap, .case-top { grid-template-columns: 1fr; gap: 40px; }
+    .price-list li { grid-template-columns: 1fr auto; gap: 6px 20px; }
+    .price-list li p { grid-column: 1 / -1; grid-row: 2; }
+    .flow { grid-template-columns: 1fr 1fr; row-gap: 28px; }
+    .flow div:nth-child(2)::after { display: none; }
+    .steps { grid-template-columns: 1fr 1fr; }
+    .features { columns: 1; }
+    .case { padding: 32px 22px; }
+  }
+  @media (max-width: 560px) {
+    body { font-size: 16px; }
+    .wrap { padding: 0 16px; }
+    .top nav { display: none; }
+    .hero { padding: 24px 0 64px; }
+    .block { padding: 64px 0; }
+    .flow, .steps { grid-template-columns: 1fr; }
+    .flow div::after { display: none; }
+    .btn { width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== НАСТРОЙКИ =====
+     Имя: Mouzy. Telegram для заказов: m0uzyy (ссылки t.me/m0uzyy встречаются 2 раза).
+-->
+
+<header class="top">
+  <div class="wrap">
+    <a href="#" class="brand">Mouzy</a>
+    <nav aria-label="Розділи сторінки">
+      <a href="#services">Послуги</a>
+      <a href="#case">Кейс</a>
+      <a href="#process">Як працюємо</a>
+      <a href="#contact">Контакти</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- ПЕРВЫЙ ЭКРАН -->
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <h1>Жодна заявка від клієнта не загубиться</h1>
+        <p class="lede">Роблю Telegram-ботів і сайти для малого бізнесу. Бот приймає заявки цілодобово, команда бачить кожну з них у робочому чаті, а керівник отримує статистику в Excel.</p>
+        <div class="hero-actions">
+          <a class="btn" href="https://t.me/m0uzyy" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M9.8 15.2l-.4 5.4c.6 0 .8-.3 1.1-.6l2.7-2.5 5.5 4c1 .6 1.7.3 2-.9l3.6-16.9c.3-1.5-.6-2.1-1.6-1.7L1.5 10.3c-1.4.6-1.4 1.4-.2 1.8l5.5 1.7L19.4 5.8c.6-.4 1.1-.2.7.2"/></svg>
+            Написати в Telegram
+          </a>
+          <a class="link" href="#case">Подивитися кейс</a>
+        </div>
+      </div>
+
+      <!-- Живая демо-заявка: посетитель сам нажимает кнопки -->
+      <div class="chat" aria-label="Демонстрація: як заявка приходить у робочий чат">
+        <div class="chat-head">
+          <div class="chat-ava" aria-hidden="true">З</div>
+          <div>
+            <div class="chat-title">Заявки компанії</div>
+            <div class="chat-sub">робочий чат команди</div>
+          </div>
+        </div>
+        <div id="demo" aria-live="polite"></div>
+        <p class="chat-hint" id="demoHint">Це демо. Натисніть кнопку під заявкою</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- УСЛУГИ -->
+  <section class="block" id="services">
+    <div class="wrap">
+      <div class="block-head">
+        <h2>Що я роблю</h2>
+        <p class="lede">Кожен проєкт налаштовую під ваші послуги, тексти й процес роботи з клієнтами.</p>
+      </div>
+      <ul class="price-list">
+        <li>
+          <h3>Telegram-бот для заявок</h3>
+          <p>Послуги, ціни, контакти, запис на консультацію і питання до фахівця. Заявки приходять вам у Telegram.</p>
+          <div class="price">від $30</div>
+        </li>
+        <li>
+          <h3>Система роботи із заявками</h3>
+          <p>Бот і робочий чат команди: статуси заявок, відповідальні, нагадування, джерела клієнтів, звіти в Excel.</p>
+          <div class="price">від $60</div>
+        </li>
+        <li>
+          <h3>Сайт-лендинг</h3>
+          <p>Одна сторінка про ваш бізнес: послуги, ціни, відгуки, контакти. Добре виглядає на телефоні.</p>
+          <div class="price">від $25</div>
+        </li>
+        <li>
+          <h3>Тест-підбір послуги на сайт</h3>
+          <p>Кілька запитань допомагають клієнту обрати послугу і ведуть його в бот із заявкою.</p>
+          <div class="price">від $25</div>
+        </li>
+        <li>
+          <h3>Підтримка</h3>
+          <p>Зміна текстів і цін, нові функції, контроль роботи бота.</p>
+          <div class="price">від $5 <small>/ міс</small></div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- КЕЙС -->
+  <section class="block" id="case">
+    <div class="wrap">
+      <div class="block-head">
+        <h2>Кейс: бот для центру сертифікації</h2>
+        <p class="lede">Бот для сторінки послуги «Технічний регламент на косметичну продукцію» — обов'язкової нотифікації косметики в Україні.</p>
+      </div>
+      <div class="case">
+        <div class="case-top">
+          <div>
+            <h3>Задача</h3>
+            <p>Після введення обов'язкової нотифікації косметики компанії потрібно швидко обробляти звернення виробників та імпортерів: зрозуміти обсяг робіт і першими зв'язатися з тими, кому найтерміновіше.</p>
+          </div>
+          <div>
+            <h3>Рішення</h3>
+            <p>Telegram-бот на сторінці послуги. Він пояснює, що входить у процедуру і хто зобов'язаний її пройти, а заявку збирає за чотири натискання. Фахівець одразу бачить обсяг робіт і пріоритет.</p>
+          </div>
+        </div>
+
+        <h3>Шлях клієнта</h3>
+        <div class="flow">
+          <div><b>1</b><span>Сторінка послуги</span><small>Клієнт натискає «Розрахунок вартості в Telegram»</small></div>
+          <div><b>2</b><span>Бот</span><small>Хто клієнт, чи продукція вже в продажу, скільки найменувань, які є документи</small></div>
+          <div><b>3</b><span>Робочий чат</span><small>Заявка з позначкою пріоритету, фахівець бере її в роботу одним натисканням</small></div>
+          <div><b>4</b><span>Звіт</span><small>Статистика за тиждень і файл Excel для керівника</small></div>
+        </div>
+
+        <h3>Що вміє система</h3>
+        <ul class="features">
+          <li>Пріоритет для клієнтів, чия продукція вже в продажу</li>
+          <li>Обсяг робіт у заявці: асортимент і наявні документи</li>
+          <li>Статуси: нова, в роботі, зв'язались, відмова</li>
+          <li>Нагадування, якщо заявку не взяли за 15 хвилин</li>
+          <li>Джерело клієнта: Google, Facebook, реклама</li>
+          <li>Статистика і вивантаження всіх заявок в Excel</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- КАК РАБОТАЕМ -->
+  <section class="block" id="process">
+    <div class="wrap">
+      <div class="block-head">
+        <h2>Як працюємо</h2>
+      </div>
+      <ol class="steps">
+        <li><b>1</b><span>Обговорення</span><p>Ви розповідаєте про бізнес і клієнтів, я пропоную рішення і ціну.</p></li>
+        <li><b>2</b><span>Демо</span><p>За кілька днів показую робочу версію на ваших даних.</p></li>
+        <li><b>3</b><span>Правки</span><p>Доопрацьовую тексти й функції за вашими побажаннями.</p></li>
+        <li><b>4</b><span>Запуск</span><p>Розміщую на сервері, навчаю команду, залишаюся на підтримці.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- КОНТАКТ -->
+  <section class="contact" id="contact">
+    <div class="wrap">
+      <h2>Розкажіть, як до вас зараз приходять клієнти</h2>
+      <p>Напишіть у Telegram кілька слів про ваш бізнес. Я відповім, що можна автоматизувати і скільки це коштуватиме.</p>
+      <a class="btn" href="https://t.me/m0uzyy" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M9.8 15.2l-.4 5.4c.6 0 .8-.3 1.1-.6l2.7-2.5 5.5 4c1 .6 1.7.3 2-.9l3.6-16.9c.3-1.5-.6-2.1-1.6-1.7L1.5 10.3c-1.4.6-1.4 1.4-.2 1.8l5.5 1.7L19.4 5.8c.6-.4 1.1-.2.7.2"/></svg>
+        Написати в Telegram
+      </a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">© 2026 Mouzy · Telegram-боти та сайти для бізнесу</div>
+</footer>
+
+<script>
+// ===== ДЕМО-ЗАЯВКА В ПЕРВОМ ЭКРАНЕ =====
+(function () {
+  var demo = document.getElementById('demo');
+  var hint = document.getElementById('demoHint');
+  var state = 'new';
+  var reminderTimer;
+
+  var STATUS = {
+    'new':   { text: 'Нова', cls: '' },
+    'taken': { text: 'В роботі', cls: 'taken' },
+    'done':  { text: "Зв'язались", cls: 'done' }
+  };
+
+  function leadHtml() {
+    var s = STATUS[state];
+    return '<div class="msg-from">Бот заявок</div>' +
+      '<div class="lead-urgent">🔥 Продукція вже в продажу</div>' +
+      '<div class="lead-title">Заявка №27 <span class="status ' + s.cls + '">' + s.text + '</span></div>' +
+      '<div class="lead-meta">сьогодні 21:47 · Джерело: Google</div>' +
+      'Послуга: нотифікація косметики<br>' +
+      'Клієнт: імпортер, понад 20 найменувань<br>' +
+      'Документи: є склад, звіту з безпеки немає<br>' +
+      'Телефон: +380 67 000 00 00' +
+      (state !== 'new' ? '<div class="lead-owner">Відповідальний: ви</div>' : '');
+  }
+
+  function render(animate) {
+    demo.innerHTML = '';
+    var msg = document.createElement('div');
+    msg.className = 'msg' + (animate ? ' arrive' : '');
+    msg.innerHTML = leadHtml();
+    demo.appendChild(msg);
+
+    if (state !== 'done') {
+      var kbd = document.createElement('div');
+      kbd.className = 'kbd' + (animate ? ' arrive' : '');
+      if (state === 'new') {
+        kbd.appendChild(button('✋ Беру в роботу', function () { setState('taken'); }));
+      } else {
+        kbd.appendChild(button("✅ Зв'язались", function () { setState('done'); }));
+        kbd.appendChild(button('❌ Відмова', function () { setState('done'); }));
+      }
+      demo.appendChild(kbd);
+    }
+  }
+
+  function button(text, onClick) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = text;
+    b.onclick = onClick;
+    return b;
+  }
+
+  function setState(next) {
+    state = next;
+    clearTimeout(reminderTimer);
+    render(false);
+    hint.textContent = next === 'taken'
+      ? 'Статус змінився — колеги бачать, що клієнтом уже займаються'
+      : 'Готово. Заявка закрита і потрапить у тижневий звіт';
+  }
+
+  function showReminder() {
+    if (state !== 'new') return;
+    var r = document.createElement('div');
+    r.className = 'msg reminder arrive';
+    r.innerHTML = '<div class="msg-from">Бот заявок</div>⏰ Заявку №27 ніхто не взяв у роботу вже 15 хвилин. Клієнт чекає на дзвінок.';
+    demo.appendChild(r);
+    hint.textContent = 'Так виглядає нагадування, якщо заявку ніхто не взяв';
+  }
+
+  render(true);
+  reminderTimer = setTimeout(showReminder, 7000);
+})();
+</script>
+</body>
+</html>
